@@ -51,7 +51,7 @@ traffic_hist_schema = StructType(
         StructField("direction", StringType(), True),
         StructField("from_street", StringType(), True),
         StructField("to_street", StringType(), True),
-        StructField("length", IntegerType(), True),
+        StructField("length", DoubleType(), True),
         StructField("street_heading", StringType(), True),
         StructField("comments", StringType(), True),
         StructField("bus_count", IntegerType(), True),
