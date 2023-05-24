@@ -76,3 +76,44 @@ def f_congestion_batch(spark: SparkSession) -> DataFrame:
     """)
 
     return f_congestion_batch
+
+def f_crash(spark: SparkSession) -> DataFrame:
+    f_crash = spark.sql("""
+        select 
+            crash_record_id as crash_record_id,
+            rd_no as report_number,
+            to_timestamp(crash_date, 'MM/dd/yyyy HH:mm:ss a') as crash_timestamp,
+            CAST(date_format(crash_timestamp, 'yyyyMMdd') AS INT) as crash_date_key,
+            CAST(date_format(crash_timestamp, 'hh') AS INT) as crash_hour_key,
+            posted_speed_limit as posted_speed_limit,
+            traffic_control_device as traffic_control_device,
+            device_condition as device_condition,
+            weather_condition as weather_condition,
+            lighting_condition as lighting_condition,
+            roadway_surface_cond as roadway_surface_cond,
+            road_defect as road_defect,
+            first_crash_type as first_crash_type,
+            trafficway_type as trafficway_type,
+            lane_cnt as lane_cnt,
+            report_type as report_type,
+            crash_type as crash_type,
+            damage as damage,
+            street_no as street_no,
+            ds.street_key as street_key,
+            num_units as num_units,
+            most_severe_injury as most_severy_injury,
+            injuries_total as injuries_total,
+            injuries_fatal as injuries_fatal,
+            injuries_incapacitating as injuries_incapacitating,
+            injuries_non_incapacitating as injuries_non_incapacitating,
+            injuries_reported_not_evident as injuries_reported_not_evident,
+            injuries_no_indication as injuries_no_indication,
+            injuries_unknown as injuries_unknown,
+            latitude as latitude,
+            longitude as longitude
+        FROM crashes c
+        LEFT JOIN d_street ds 
+        ON ds.full_street_name LIKE CONCAT(UPPER(c.street_name), '%');
+    """)
+
+    return f_crash
