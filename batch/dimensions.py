@@ -110,13 +110,17 @@ def dim_camera_map_street(spark: SparkSession, dim_camera_staging: DataFrame, di
         FROM 
             d_camera_staging dcs
         LEFT JOIN
-            d_streets ds
+            d_street ds
         ON ds.full_street_name = CONCAT(dcs.street_name, '%')
     """)
 
+    d_camera = d_camera.drop_duplicates(['camera_id'])
+
     return d_camera
 
-def dim_segment(spark: SparkSession) -> DataFrame:
+def dim_segment(spark: SparkSession, dim_street: DataFrame) -> DataFrame:
+    dim_street.createOrReplaceTempView("d_street")
+
     d_segment = spark.sql("""
         with d_segment_staging
         as (
@@ -151,20 +155,12 @@ def dim_segment(spark: SparkSession) -> DataFrame:
         from 
             d_segment_staging dss
         inner join 
-            (
-                select 
-                    street_key,
-                    direction,
-                    street,
-                    suffix,
-                    full_street_name,
-                    row_number() over (partition by direction, street order by suffix) as rn
-                from d_street
-            ) ds on 
+            d_street ds on 
                 dss.street_heading = ds.direction
                 and dss.street = ds.street
-                and ds.rn = 1
     """)
+
+    d_segment = d_segment.drop_duplicates(['segment_id'])
 
     return d_segment
 

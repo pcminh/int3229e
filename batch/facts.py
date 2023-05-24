@@ -31,7 +31,7 @@ def fact_violation(spark: SparkSession) -> DataFrame:
         select * from f_violation_redlight_staging
         union
         select * from f_violation_speed_staging 
-    ),
+    )
 
     select 
         camera_id,
@@ -43,7 +43,7 @@ def fact_violation(spark: SparkSession) -> DataFrame:
 
     return f_violation
 
-def f_congestion_batch(spark: SparkSession) -> DataFrame:
+def fact_congestion_batch(spark: SparkSession) -> DataFrame:
     f_congestion_batch = spark.sql("""
         with f_congestion_batch_staging
         as (
@@ -77,7 +77,7 @@ def f_congestion_batch(spark: SparkSession) -> DataFrame:
 
     return f_congestion_batch
 
-def f_crash(spark: SparkSession) -> DataFrame:
+def fact_crash(spark: SparkSession) -> DataFrame:
     f_crash = spark.sql("""
         select 
             crash_record_id as crash_record_id,
