@@ -5,15 +5,29 @@ def dim_street(spark: SparkSession) -> DataFrame:
     d_street = spark.sql("""
         select 
             row_number() over (order by street asc, suffix asc, direction asc) as street_key,
-            full_street_name as full_street_name,
-            direction as direction,
-            street as street,
-            suffix as suffix,
-            suffix_direction as suffix_direction,
+            TRIM(direction) as direction,
+            TRIM(street) as street,
+            TRIM(suffix) as suffix,
+            TRIM(suffix_direction) as suffix_direction,
             min_address as min_address,
             max_address as max_address
         from streets
     """)
+
+    # Append default suffix ST
+    d_street = d_street.withColumn("suffix", when(d_street.suffix == '', 'ST').otherwise(d_street.suffix))
+
+    # Recalculate full_street_name
+    d_street = d_street.selectExpr(
+        "street_key",
+        "direction",
+        "street",
+        "suffix",
+        "suffix_direction",
+        "TRIM(CONCAT_WS(' ', direction, street, suffix, suffix_direction)) AS full_street_name",
+        "min_address",
+        "max_address"
+    )
 
     return d_street
 
@@ -57,6 +71,18 @@ def dim_camera_stage(spark: SparkSession) -> DataFrame:
 
 
     dcam = dcam.withColumn("address",
+                        when(dcam.address.endswith("PULASKI AVENUE"), regexp_replace(dcam.address, "PULASKI AVENUE", "PULASKI RD")) \
+                        .when(dcam.address.endswith("PULASKI"), regexp_replace(dcam.address, "PULASKI", "PULASKI RD")) \
+                        .when(dcam.address.contains("LAKESHORE"), regexp_replace(dcam.address, "LAKESHORE", "LAKE SHORE")) \
+                        .when(dcam.address.endswith("MARTIN LUTHER KING"), regexp_replace(dcam.address, "MARTIN LUTHER KING", "DR MARTIN LUTHER KING")) \
+                        .when(dcam.address.endswith("DR MARTIN L KING"), regexp_replace(dcam.address, "DR MARTIN L KING", "DR MARTIN LUTHER KING")) \
+                        .when(dcam.address.endswith("MARTIN L KING"), regexp_replace(dcam.address, "MARTIN L KING", "DR MARTIN LUTHER KING")) \
+                        .when(dcam.address.endswith("UPPER WACKER DR"), regexp_replace(dcam.address, "UPPER WACKER DR", "WACKER DR")) \
+                        .when(dcam.address.contains("LASALLE"), regexp_replace(dcam.address, "LASALLE", "LA SALLE")) \
+                        .otherwise(dcam.address)
+                        )
+
+    dcam = dcam.withColumn("address",
                         when(dcam.address.endswith("STREET"), regexp_replace(dcam.address, "STREET", "ST")) \
                         .when(dcam.address.endswith("STREE"), regexp_replace(dcam.address, "STREE", "ST")) \
                         .when(dcam.address.endswith("AVENUE"), regexp_replace(dcam.address, "AVENUE", "AVE")) \
@@ -68,11 +94,10 @@ def dim_camera_stage(spark: SparkSession) -> DataFrame:
                         .when(dcam.address.endswith("ROA"), regexp_replace(dcam.address, "ROA", "RD")) \
                         .when(dcam.address.endswith("BOULEVARD"), regexp_replace(dcam.address, "BOULEVARD", "BLVD")) \
                         .when(dcam.address.endswith("BOUL"), regexp_replace(dcam.address, "BOUL", "BLVD")) \
+                        .when(dcam.address.endswith("BOULEV"), regexp_replace(dcam.address, "BOULEV", "BLVD")) \
                         .when(dcam.address.endswith("DRIVE"), regexp_replace(dcam.address, "DRIVE", "DR")) \
                         .when(dcam.address.endswith("DRIV"), regexp_replace(dcam.address, "DRIV", "DR")) \
-                        .when(dcam.address.endswith("MARTIN LUTHER KING"), regexp_replace(dcam.address, "MARTIN LUTHER KING", "DR MARTIN LUTHER KING")) \
-                        .when(dcam.address.endswith("DR MARTIN L KING"), regexp_replace(dcam.address, "DR MARTIN L KING", "DR MARTIN LUTHER KING")) \
-                        .when(dcam.address.endswith("MARTIN L KING"), regexp_replace(dcam.address, "MARTIN L KING", "DR MARTIN LUTHER KING")) \
+                        .when(dcam.address.endswith("PK"), regexp_replace(dcam.address, "PK", "PARK")) \
                         .otherwise(dcam.address)
                         )
 
@@ -111,7 +136,8 @@ def dim_camera_map_street(spark: SparkSession, dim_camera_staging: DataFrame, di
             d_camera_staging dcs
         LEFT JOIN
             d_street ds
-        ON ds.full_street_name = CONCAT(dcs.street_name, '%')
+        ON 
+            ds.full_street_name LIKE CONCAT(dcs.street_name, '%')
     """)
 
     d_camera = d_camera.drop_duplicates(['camera_id'])

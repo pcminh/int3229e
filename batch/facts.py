@@ -77,7 +77,8 @@ def fact_congestion_batch(spark: SparkSession) -> DataFrame:
 
     return f_congestion_batch
 
-def fact_crash(spark: SparkSession) -> DataFrame:
+def fact_crash(spark: SparkSession, dim_street: DataFrame) -> DataFrame:
+    dim_street.createOrReplaceTempView('d_street')
     f_crash = spark.sql("""
         select 
             crash_record_id as crash_record_id,
@@ -113,7 +114,8 @@ def fact_crash(spark: SparkSession) -> DataFrame:
             longitude as longitude
         FROM crashes c
         LEFT JOIN d_street ds 
-        ON ds.full_street_name LIKE CONCAT(UPPER(c.street_name), '%');
+        ON ds.full_street_name LIKE CONCAT('%', UPPER(c.street_name), '%');
     """)
+    f_crash = f_crash.drop_duplicates(['crash_record_id'])
 
     return f_crash
