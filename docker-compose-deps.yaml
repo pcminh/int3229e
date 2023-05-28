@@ -4,7 +4,7 @@ services:
     image: confluentinc/cp-zookeeper:7.0.1
     container_name: zookeeper
     ports:
-        - "2181:2181"
+        - 2181
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -15,9 +15,9 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "29092:29092"
+      - 29092
       - "9092:9092"
-      - "9101:9101"
+      - 9101
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
@@ -29,3 +29,12 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
+  
+  db:
+    image: postgres
+    ports:
+      - ${SINK_PSQL_PORT}:5432
+    restart: always
+    shm_size: 4gb
+    environment:
+      POSTGRES_PASSWORD: ${SINK_PSQL_PASS}

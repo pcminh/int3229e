@@ -114,7 +114,8 @@ CREATE TABLE f_congestion (
 	bus_count int2 NULL,
 	message_count int2 NULL,
 	date_key int4 NULL,
-	hour_key int4 NULL
+	hour_key int4 NULL,
+	constraint f_congestion_pkey primary key (record_id)
 );
 
 

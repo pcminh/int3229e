@@ -16,9 +16,9 @@ load_dotenv()
 SOCRATA_APP_TOKEN=os.getenv("SOCRATA_APP_TOKEN")
 KAFKA_BOOTSTRAP_SERVER=os.getenv("KAFKA_BOOTSTRAP_SERVER")
 KAFKA_TOPIC=os.getenv("KAFKA_TOPIC")
-DEST_PSQL_URL=os.getenv("DEST_PSQL_URL")
-DEST_PSQL_USER=os.getenv("DEST_PSQL_USER")
-DEST_PSQL_PASS=os.getenv("DEST_PSQL_PASS")
+SINK_PSQL_URL=f'jdbc:postgresql://{os.getenv("SINK_PSQL_HOST")}:{os.getenv("SINK_PSQL_PORT")}/{os.getenv("SINK_PSQL_DB")}'
+SINK_PSQL_USER=os.getenv("SINK_PSQL_USER")
+SINK_PSQL_PASS=os.getenv("SINK_PSQL_PASS")
 
 from pyspark.sql import SparkSession 
 
@@ -78,10 +78,10 @@ def transform_to_f_congestion(df: DataFrame) -> DataFrame:
 
 def append_to_psql(df: DataFrame) -> DataFrame:
     prop = {
-        'url': os.getenv("DEST_PSQL_URL"),
+        'url': f'jdbc:postgresql://{os.getenv("SINK_PSQL_HOST")}:{os.getenv("SINK_PSQL_PORT")}/{os.getenv("SINK_PSQL_DB")}',
         "driver": 'org.postgresql.Driver',
-        'user': os.getenv("DEST_PSQL_USER"),
-        'password': os.getenv("DEST_PSQL_PASS")
+        'user': os.getenv("SINK_PSQL_USER"),
+        'password': os.getenv("SINK_PSQL_PASS")
     }
     
     df.write.jdbc(url=prop['url'], table='f_congestion', mode='append', properties=prop)
