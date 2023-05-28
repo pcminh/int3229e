@@ -37,6 +37,7 @@ Cấu trúc của repository mã nguồn này như sau:
 | sink_ddl.sh                    | Tạo database trên CSDL PostgreSQL và thực hiện DDL tạo các bảng                                                                                        |
 | batch_main.py                  | Main entrypoint của luồng dữ liệu Lô, spark-submit file này                                                                                            |
 | streaming_main.sh              | Main entrypoint của luồng dữ liệu Streaming, execute file này                                                                                          |
+| requirements.txt               | Chạy `pip install -r requirements.txt` trên file này                                                                                                   |
 
 Chi tiết về từng cấu trúc của mỗi thư mục sẽ được trình bày trong file README.md trong đó
 
@@ -65,8 +66,9 @@ Dựa trên file .env.template để tạo file .env với các biến môi trư
 Thực hiện các bước sau đây:
 
 1. Chuẩn bị file `.env` như trình bày ở chương trên
-2. Thực thi lệnh `docker compose -f docker-compose-deps.yaml --env-file .env up` để khởi động các container service cần thiết để chạy các Spark Jobs
-3. Chạy `getdata.sh` để tải dữ liệu từ City of Chicago Data Portal. Phụ thuộc vào biến DATASET_LOCATION_TYPE và DATASET_ROOT_PATH để tải tập dữ liệu vào local filesystem hoặc HDFS
-4. Chạy `psql_ddl.sh` để tạo database trên PostgreSQL và tạo các bảng dimension và bảng fact trên database đó
-5. Chạy `spark-submit batch_main.py` để thực thi luồng dữ liệu lô
-6. Chạy `source streaming_main.sh` để thực thi luồng dữ liệu streaming 
+1. Thực thi lệnh `docker compose -f docker-compose-deps.yaml --env-file .env up` để khởi động các container service cần thiết để chạy các Spark Jobs
+1. Chạy `pip install -r requirements.txt` để cài các package Python cần thiết để chạy, nên chạy trên môi trường venv cục bộ
+1. Chạy `getdata.sh` để tải dữ liệu từ City of Chicago Data Portal. Phụ thuộc vào biến DATASET_LOCATION_TYPE và DATASET_ROOT_PATH để tải tập dữ liệu vào local filesystem hoặc HDFS
+1. Chạy `psql_ddl.sh` để tạo database trên PostgreSQL và tạo các bảng dimension và bảng fact trên database đó
+1. Chạy `spark-submit batch_main.py` để thực thi luồng dữ liệu lô
+1. Chạy `source streaming_main.sh` để thực thi luồng dữ liệu streaming 
