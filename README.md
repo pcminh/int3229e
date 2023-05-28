@@ -1,4 +1,4 @@
-# Xử lý dữ liệu theo lô và streaming và trực quan hóa trên PostgreSQL
+# Xử lý dữ liệu theo lô và streaming bằng Apache Spark
 Bài tập lớn môn INT3229E - Kỹ thuật và công nghệ dữ liệu lớn
 
 
@@ -30,7 +30,7 @@ Cấu trúc của repository mã nguồn này như sau:
 |--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
 | /batch                         | Các job biến đổi dữ liệu dạng lô. Readme tại [đây](batch/README.md)                                                                                    |
 | /streams                       | Kafka Producer bao quanh API Socrata của tập dữ liệu lô, Job Spark Streaming đọc từ Kafka và transform dữ liệu. Readme tại [đây](streams/README.md)    |
-| /sql                           | Các câu lệnh DDL, DML dùng trên Spark SQL API hoặc PostgreSQL. Readme tại [đây](streams/README.md)                                                     |
+| /sql                           | Các câu lệnh DDL, DML dùng trên Spark SQL API hoặc PostgreSQL. Readme tại [đây](sql/README.md)                                                         |
 | .env, .env.template            | File biến môi trường chứa thông tin triển khai Kafka và PostgreSQL. Dùng khi chạy các job Spark và khi triển khai các dependencies bằng Docker Compose |
 | docker-compose-deps.yaml       | Triển khai dependencies chạy trên Docker Compose: Kafka (và Zookeeper), PostgreSQL (chạy Data Mart)                                                    |
 | getdata.sh                     | Tải về các tập dữ liệu dạng lô và lưu trên HDFS hoặc local FS (dựa vào tham số DATASET_LOCATION_TYPE và DATASET_ROOT_PATH trong .env)                  |
